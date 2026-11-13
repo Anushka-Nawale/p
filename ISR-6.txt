@@ -1,0 +1,83 @@
+ISR_6
+
+!pip install nltk scikit-learn
+import nltk
+from nltk.stem import PorterStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+ps = PorterStemmer()
+
+def stem_text(text):
+    words = text.lower().split()
+    return " ".join([ps.stem(word) for word in words])
+
+docs = [
+    "Cricket team won the match and players celebrated victory",
+    "Football team won the game and players celebrated success",
+    "Artificial intelligence is changing technology and computers",
+    "Machine learning is improving artificial intelligence",
+    "Stock market prices increased and business companies earned profit"
+]
+
+for i in range(5):
+    with open("doc" + str(i+1) + ".txt", "w") as f:
+        f.write(docs[i])
+
+print("Five text files created successfully")
+
+documents = []
+
+for i in range(5):
+    with open("doc" + str(i+1) + ".txt", "r") as f:
+        text = f.read()
+        documents.append(stem_text(text))
+
+print(documents)
+
+vectorizer = TfidfVectorizer()
+
+X = vectorizer.fit_transform(documents)
+
+print("TF-IDF Matrix:")
+print(X.toarray())
+
+clusters = []
+centroids = []
+
+threshold = 0.15
+
+for i in range(len(documents)):
+
+    if len(clusters) == 0:
+        clusters.append([i])
+        centroids.append(X[i].toarray()[0])
+        continue
+
+    similarity = cosine_similarity(
+        X[i], centroids
+    )[0]
+
+    best = similarity.argmax()
+
+    if similarity[best] >= threshold:
+        clusters[best].append(i)
+
+        centroids[best] = sum(
+            X[j].toarray()[0] for j in clusters[best]
+        ) / len(clusters[best])
+
+    else:
+        clusters.append([i])
+        centroids.append(X[i].toarray()[0])
+
+print("Clusters:")
+for i, cluster in enumerate(clusters):
+    print("Cluster", i+1)
+    for j in cluster:
+        print(documents[j])
+
+for i, cluster in enumerate(clusters):
+    print("\nCluster", i+1)
+    print("Number of documents:", len(cluster))
+

@@ -1,0 +1,39 @@
+Bully
+import java.util.*;
+
+public class Bully {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+
+        int p[] = new int[n];
+
+        System.out.println("Enter process IDs:");
+        for (int i = 0; i < n; i++) {
+            p[i] = sc.nextInt();
+        }
+
+        System.out.print("Enter initiator ID: ");
+        int initiator = sc.nextInt();
+
+        int leader = initiator;
+
+        System.out.println("P" + initiator + " starts election.");
+
+        for (int i = 0; i < n; i++) {
+            if (p[i] > initiator) {
+                System.out.println("P" + p[i] + " responds.");
+                if (p[i] > leader) {
+                    leader = p[i];
+                }
+            }
+        }
+
+        System.out.println("New Coordinator is P" + leader);
+
+        sc.close();
+    }
+}

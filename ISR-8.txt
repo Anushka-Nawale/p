@@ -1,0 +1,100 @@
+ISR_8
+
+
+pip install ir_datasets scikit-learn numpy
+
+import ir_datasets
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+dataset = ir_datasets.load("cranfield")
+
+documents = list(dataset.docs_iter())
+queries = list(dataset.queries_iter())
+qrels = list(dataset.qrels_iter())
+
+
+doc_ids = [d.doc_id for d in documents]
+doc_texts = [d.text for d in documents]
+
+
+query_id = "1"
+
+query = next(q for q in queries if q.query_id == query_id)
+
+Rq1 = {
+    q.doc_id for q in qrels
+    if q.query_id == query_id and q.relevance > 0
+}
+
+
+vectorizer = TfidfVectorizer(stop_words="english")
+
+X = vectorizer.fit_transform(doc_texts)
+Q = vectorizer.transform([query.text])
+
+
+scores = cosine_similarity(Q, X)[0]
+
+
+ranking = np.argsort(scores)[::-1]
+
+
+K = 10
+retrieved = [doc_ids[i] for i in ranking[:K]]
+
+retrieved_set = set(retrieved)
+
+TP = len(retrieved_set & Rq1)
+
+precision = TP / len(retrieved_set)
+
+recall = TP / len(Rq1)
+
+
+if precision + recall != 0:
+    f1 = 2 * precision * recall / (precision + recall)
+else:
+    f1 = 0
+
+E = 1 - f1
+
+relevance = [
+    next(
+        (q.relevance for q in qrels
+         if q.query_id == query_id and q.doc_id == doc_id),
+        0
+    )
+    for doc_id in retrieved
+]
+
+def DCG(rels):
+    return sum(
+        (2**rel - 1) / np.log2(i + 2)
+        for i, rel in enumerate(rels)
+    )
+
+actual_dcg = DCG(relevance)
+
+ideal_relevance = sorted(
+    [q.relevance for q in qrels if q.query_id == query_id],
+    reverse=True
+)[:K]
+
+ideal_dcg = DCG(ideal_relevance)
+
+ndcg = actual_dcg / ideal_dcg if ideal_dcg != 0 else 0
+
+
+print("Query:", query.text)
+print("Relevant documents Rq1:", sorted(Rq1))
+print("Retrieved documents:", retrieved)
+
+print("\n--- Evaluation ---")
+print("Precision :", round(precision, 4))
+print("Recall    :", round(recall, 4))
+print("F-measure :", round(f1, 4))
+print("E-measure :", round(E, 4))
+print("NDCG@10   :", round(ndcg, 4))

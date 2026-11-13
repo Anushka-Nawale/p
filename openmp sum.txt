@@ -1,0 +1,50 @@
+openmp sum.c
+
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    int a[100], N, n, total = 0;
+    int sum[100] = {0};
+
+    printf("Enter number of elements: ");
+    scanf("%d", &N);
+
+    if (N < 1 || N > 100) return 1;
+
+    printf("Enter array elements:\n");
+    for (int i = 0; i < N; i++)
+        scanf("%d", &a[i]);
+
+    printf("Enter number of processors: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > N) return 1;
+
+    omp_set_dynamic(0);
+
+    #pragma omp parallel num_threads(n)
+    {
+        int id = omp_get_thread_num();
+        int threads = omp_get_num_threads();
+
+        int start = id * N / threads;
+        int end = (id + 1) * N / threads;
+
+        for (int i = start; i < end; i++)
+            sum[id] += a[i];
+    }
+
+    for (int i = 0; i < n; i++) {
+        printf("Processor %d sum = %d\n", i, sum[i]);
+        total += sum[i];
+    }
+
+    printf("Total Sum = %d\n", total);
+
+    return 0;
+}
+
+cd C:\Users\Admin\OneDrive\Desktop\DCS
+gcc -fopenmp sum.c -o sum
+sum.exe

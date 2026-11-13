@@ -1,0 +1,68 @@
+DCS_Prac-5
+
+WebClient.java
+
+import java.net.*;
+import java.io.*;
+
+public class WebClient {
+    public static void main(String[] args) throws Exception {
+
+        URL url = new URL("http://localhost:8085/add?a=10&b=20");
+
+        BufferedReader br = new BufferedReader(
+            new InputStreamReader(url.openStream()));
+
+        String response = br.readLine();
+
+        System.out.println("Response from Server: " + response);
+
+        br.close();
+    }
+}
+
+WebServer.java
+
+
+import com.sun.net.httpserver.*;
+import java.net.*;
+import java.io.*;
+
+public class WebServer {
+    public static void main(String[] args) throws Exception {
+
+        HttpServer server = HttpServer.create(
+            new InetSocketAddress(8085), 0);
+
+        server.createContext("/add", exchange -> {
+            try {
+                String query = exchange.getRequestURI().getQuery();
+                String[] values = query.split("&");
+
+                int a = Integer.parseInt(values[0].split("=")[1]);
+                int b = Integer.parseInt(values[1].split("=")[1]);
+
+                String result = "Sum = " + (a + b);
+
+                byte[] data = result.getBytes("UTF-8");
+                exchange.sendResponseHeaders(200, data.length);
+
+                OutputStream os = exchange.getResponseBody();
+                os.write(data);
+                os.close();
+
+                System.out.println("Request received: " + a + " + " + b);
+            } catch (Exception e) {
+                String error = "Invalid input";
+                byte[] data = error.getBytes("UTF-8");
+                exchange.sendResponseHeaders(400, data.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(data);
+                os.close();
+            }
+        });
+
+        server.start();
+        System.out.println("Web Service running on port 8085...");
+    }
+}
