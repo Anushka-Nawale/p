@@ -1,0 +1,508 @@
+6-Event
+
+folder Structure:: public/admin.html
+                   server.js
+
+1) admin.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Management System</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef3ff;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            max-width: 850px;
+            margin: 30px auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px #ccc;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2457c5;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #2457c5;
+            color: white;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        button:hover {
+            background: #17439e;
+        }
+
+        .delete {
+            background: #dc3545;
+        }
+
+        .logout {
+            background: #555;
+            float: right;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #2457c5;
+            color: white;
+        }
+
+        #dashboard {
+            display: none;
+        }
+
+        #message, #loginMsg {
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Admin Login -->
+
+<div class="container" id="login">
+
+    <h2>Admin Login</h2>
+
+    <input type="text" id="username"
+    placeholder="Enter Username">
+
+    <input type="password" id="password"
+    placeholder="Enter Password">
+
+    <button onclick="login()">Login</button>
+
+    <p id="loginMsg"></p>
+
+</div>
+
+
+<!-- Admin Dashboard -->
+
+<div class="container" id="dashboard">
+
+    <button class="logout" onclick="logout()">Logout</button>
+
+    <h2>Event Management Dashboard</h2>
+
+    <h3>Add / Update Event</h3>
+
+    <form id="eventForm">
+
+        <input type="text" id="title"
+        placeholder="Event Title" required>
+
+        <input type="date" id="date" required>
+
+        <input type="text" id="location"
+        placeholder="Event Location" required>
+
+        <textarea id="description"
+        placeholder="Event Description" required></textarea>
+
+        <button type="submit" id="saveBtn">Add Event</button>
+
+    </form>
+
+    <p id="message"></p>
+
+    <h3>All Events</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="eventList"></tbody>
+    </table>
+
+</div>
+
+
+<script>
+
+let editId = null;
+
+// Admin Login
+async function login() {
+
+    let response = await fetch("/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+        })
+    });
+
+    let result = await response.json();
+
+    if (response.ok) {
+
+        document.getElementById("login").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+
+        getEvents();
+
+    } else {
+
+        document.getElementById("loginMsg").innerText = result.message;
+    }
+}
+
+
+// Add or Update Event
+document.getElementById("eventForm")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    let event = {
+        title: document.getElementById("title").value,
+        date: document.getElementById("date").value,
+        location: document.getElementById("location").value,
+        description: document.getElementById("description").value
+    };
+
+    let url = editId ? "/events/" + editId : "/events";
+    let method = editId ? "PUT" : "POST";
+
+    let response = await fetch(url, {
+        method: method,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(event)
+    });
+
+    let result = await response.json();
+
+    document.getElementById("message").innerText = result.message;
+
+    if (response.ok) {
+
+        this.reset();
+        editId = null;
+
+        document.getElementById("saveBtn").innerText = "Add Event";
+
+        getEvents();
+    }
+
+});
+
+
+// Display Events
+async function getEvents() {
+
+    let response = await fetch("/events");
+
+    if (!response.ok) return;
+
+    let events = await response.json();
+
+    let list = document.getElementById("eventList");
+
+    list.innerHTML = "";
+
+    events.forEach(event => {
+
+        let row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${escapeHTML(event.title)}</td>
+            <td>${escapeHTML(event.date)}</td>
+            <td>${escapeHTML(event.location)}</td>
+            <td></td>
+        `;
+
+        let actions = row.lastElementChild;
+
+        let editBtn = document.createElement("button");
+        editBtn.innerText = "Edit";
+        editBtn.onclick = () => editEvent(event);
+
+        let deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.className = "delete";
+        deleteBtn.onclick = () => deleteEvent(event.id);
+
+        actions.append(editBtn, deleteBtn);
+
+        list.appendChild(row);
+    });
+}
+
+
+// Escape HTML
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[c]);
+}
+
+
+// Edit Event
+function editEvent(event) {
+
+    editId = event.id;
+
+    document.getElementById("title").value = event.title;
+    document.getElementById("date").value = event.date;
+    document.getElementById("location").value = event.location;
+    document.getElementById("description").value = event.description;
+
+    document.getElementById("saveBtn").innerText = "Update Event";
+}
+
+
+// Delete Event
+async function deleteEvent(id) {
+
+    if (!confirm("Are you sure you want to delete this event?")) {
+        return;
+    }
+
+    let response = await fetch("/events/" + id, {
+        method: "DELETE"
+    });
+
+    let result = await response.json();
+
+    document.getElementById("message").innerText = result.message;
+
+    if (response.ok) getEvents();
+}
+
+
+// Logout
+async function logout() {
+
+    await fetch("/logout", {
+        method: "POST"
+    });
+
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("login").style.display = "block";
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+
+}
+
+</script>
+
+</body>
+</html>
+
+2) server.js
+
+
+const express = require("express");
+const mysql = require("mysql2");
+const session = require("express-session");
+
+const app = express();
+
+app.use(express.json());
+app.use(express.static("public"));
+
+app.use(session({
+    secret: "my_secret_key",
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Connect MySQL
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "anushka",
+    database: "event_management_db"
+});
+
+db.connect(err => {
+    if (err) throw err;
+    console.log("MySQL Connected!");
+});
+
+// Admin Login
+app.post("/login", (req, res) => {
+
+    const { username, password } = req.body;
+
+    if (username === "admin" && password === "admin123") {
+
+        req.session.admin = true;
+
+        res.json({ message: "Login Successful!" });
+
+    } else {
+
+        res.status(401).json({
+            message: "Invalid Username or Password"
+        });
+    }
+});
+
+// Check Admin Login
+function checkAdmin(req, res, next) {
+
+    if (req.session.admin) {
+        next();
+    } else {
+        res.status(401).json({
+            message: "Please Login First"
+        });
+    }
+}
+
+// View Events
+app.get("/events", checkAdmin, (req, res) => {
+
+    db.query("SELECT * FROM events", (err, result) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json(result);
+    });
+});
+
+// Add Event
+app.post("/events", checkAdmin, (req, res) => {
+
+    const { title, date, location, description } = req.body;
+
+    db.query(
+        "INSERT INTO events (title, date, location, description) VALUES (?, ?, ?, ?)",
+        [title, date, location, description],
+        err => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json({ message: "Event Added Successfully!" });
+        }
+    );
+});
+
+// Update Event
+app.put("/events/:id", checkAdmin, (req, res) => {
+
+    const { title, date, location, description } = req.body;
+
+    db.query(
+        "UPDATE events SET title=?, date=?, location=?, description=? WHERE id=?",
+        [title, date, location, description, req.params.id],
+        err => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json({ message: "Event Updated Successfully!" });
+        }
+    );
+});
+
+// Delete Event
+app.delete("/events/:id", checkAdmin, (req, res) => {
+
+    db.query(
+        "DELETE FROM events WHERE id=?",
+        [req.params.id],
+        err => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json({ message: "Event Deleted Successfully!" });
+        }
+    );
+});
+
+// Logout
+app.post("/logout", (req, res) => {
+
+    req.session.destroy(() => {
+        res.json({ message: "Logged Out Successfully!" });
+    });
+});
+
+// Start Server
+app.listen(3000, () => {
+    console.log("Server running at http://localhost:3000");
+});
+
+##replace password with your mysql passwd if no paswd leave like ""
+
+----------------------------------------------------------------------
+##Queries in database
+
+CREATE DATABASE event_management_db;
+
+USE event_management_db;
+
+CREATE TABLE events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100),
+    date DATE,
+    location VARCHAR(100),
+    description VARCHAR(255)
+);
+
+USE event_management_db;
+
+SELECT * FROM events;
+
+commands on vscode
+npm init -y
+npm install express mysql2 express-session
+node server.js
+
+Run on this link --> http://localhost:3000/admin.html
+

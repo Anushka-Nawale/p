@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Class Timetable</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            text-align: center;
+        }
+
+        table {
+            width: 90%;
+            margin: auto;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 12px;
+        }
+
+        th {
+            background: #234b70;
+            color: white;
+        }
+
+        caption {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px;
+        }
+
+        h2 {
+            color: #234b70;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>ABC University, Nashik</h2>
+
+<table>
+    <caption>Class Timetable - IT Department</caption>
+
+    <tr>
+        <th>Day</th>
+        <th>9-10</th>
+        <th>10-11</th>
+        <th>11-12</th>
+        <th>12-1</th>
+        <th>1-2</th>
+    </tr>
+
+    <tr>
+        <td>Monday</td>
+        <td>Java</td>
+        <td>Python</td>
+        <td rowspan="2">Lab</td>
+        <td>Break</td>
+        <td>DBMS</td>
+    </tr>
+
+    <tr>
+        <td>Tuesday</td>
+        <td>OS</td>
+        <td>Java</td>
+        <td>Break</td>
+        <td>CN</td>
+    </tr>
+
+    <tr>
+        <td>Wednesday</td>
+        <td>DBMS</td>
+        <td colspan="2">Web Technology Lab</td>
+        <td>Break</td>
+        <td>Python</td>
+    </tr>
+
+    <tr>
+        <td>Thursday</td>
+        <td>CN</td>
+        <td>OS</td>
+        <td>Java</td>
+        <td>Break</td>
+        <td>DBMS</td>
+    </tr>
+
+    <tr>
+        <td>Friday</td>
+        <td>Python</td>
+        <td>CN</td>
+        <td>OS</td>
+        <td>Break</td>
+        <td>Library</td>
+    </tr>
+</table>
+
+<h2>University Infrastructure</h2>
+
+<table>
+    <tr>
+        <th>Facility</th>
+        <th>Details</th>
+    </tr>
+    <tr>
+        <td>Library</td>
+        <td>Books and Digital Library</td>
+    </tr>
+    <tr>
+        <td>Computer Lab</td>
+        <td>Internet and Computer Facilities</td>
+    </tr>
+    <tr>
+        <td>Sports</td>
+        <td>Indoor and Outdoor Games</td>
+    </tr>
+    <tr>
+        <td>Auditorium</td>
+        <td>Seminars and Events</td>
+    </tr>
+</table>
+
+</body>
+</html>
+
+
+div.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>University Information</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #eeeeee;
+            text-align: center;
+        }
+
+        .header {
+            background: navy;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .box {
+            background: lightblue;
+            padding: 15px;
+            margin: 10px;
+        }
+
+        span {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>ABC University</h1>
+    <p>Information Technology Department</p>
+</div>
+
+<div class="container">
+
+    <h2>University Facilities</h2>
+
+    <div class="box">
+        <h3>Library</h3>
+        <p>Our library provides <span>Digital Books</span>
+        and study materials.</p>
+    </div>
+
+    <div class="box">
+        <h3>Computer Lab</h3>
+        <p>Modern computers and internet facilities.</p>
+    </div>
+
+    <div class="box">
+        <h3>Sports</h3>
+        <p>Indoor and outdoor sports facilities.</p>
+    </div>
+
+    <h2>Audio</h2>
+    <audio controls>
+        <source src="audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <h2>University Video</h2>
+    <video width="300" controls>
+        <source src="video.mp4" type="video/mp4">
+    </video>
+
+</div>
+
+</body>
+</html>
+
+
+responsive.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Responsive University Website</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial;
+        }
+
+        header {
+            background: navy;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background: black;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 15px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        main {
+            width: 70%;
+            padding: 20px;
+            background: lightblue;
+        }
+
+        aside {
+            width: 30%;
+            padding: 20px;
+            background: lightgray;
+        }
+
+        footer {
+            background: navy;
+            color: white;
+            text-align: center;
+            padding: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+            }
+
+            main, aside {
+                width: 100%;
+            }
+
+            nav a {
+                display: block;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>ABC University</h1>
+    <p>Welcome to IT Department</p>
+</header>
+
+<nav>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Courses</a>
+    <a href="#">Contact</a>
+</nav>
+
+<div class="container">
+
+    <main>
+        <h2>Main Content</h2>
+        <p>Welcome to our university website.</p>
+        <p>We provide quality education and practical knowledge.</p>
+    </main>
+
+    <aside>
+        <h2>Sidebar</h2>
+        <p>Latest News</p>
+        <p>Upcoming Events</p>
+        <p>Notice Board</p>
+    </aside>
+
+</div>
+
+<footer>
+    <p>Copyright 2026 ABC University</p>
+</footer>
+
+</body>
+</html>

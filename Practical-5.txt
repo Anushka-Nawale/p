@@ -1,0 +1,244 @@
+5-Registration
+
+folder Structure:: public/index.html
+                   server.js
+
+
+1)index.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef3ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            width: 380px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2457c5;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2457c5;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #2457c5;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #17439e;
+        }
+
+        #message {
+            margin-top: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>User Registration</h2>
+    <p>Fill in your details to register</p>
+
+    <form id="form">
+
+        <input type="text" id="name"
+        placeholder="Enter Your Name" required>
+
+        <input type="email" id="email"
+        placeholder="Enter Your Email" required>
+
+        <input type="tel" id="phone"
+        placeholder="Enter Phone Number"
+        pattern="[0-9]{10}" maxlength="10" required>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <div id="message"></div>
+
+</div>
+
+<script>
+
+document.getElementById("form")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    let user = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value
+    };
+
+    try {
+        let response = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        });
+
+        let result = await response.json();
+
+        let message = document.getElementById("message");
+        message.innerText = result.message;
+
+        message.style.color = response.ok ? "green" : "red";
+
+        if (response.ok) {
+            document.getElementById("form").reset();
+        }
+
+    } catch (error) {
+        document.getElementById("message").innerText =
+            "Server connection failed!";
+
+        document.getElementById("message").style.color = "red";
+    }
+
+});
+
+</script>
+
+</body>
+</html>
+
+2)server.js
+
+
+const express = require("express");
+const mysql = require("mysql2");
+
+const app = express();
+
+app.use(express.json());
+app.use(express.static("public"));
+
+// Connect MySQL
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "anushka",
+    database: "registration_db"
+});
+
+db.connect(err => {
+    if (err) throw err;
+    console.log("MySQL Connected!");
+});
+
+// Store user data
+app.post("/register", (req, res) => {
+
+    const { name, email, phone } = req.body;
+
+    const sql = "INSERT INTO users (name, email, phone) VALUES (?, ?, ?)";
+
+    db.query(sql, [name, email, phone], (err) => {
+
+        if (err) {
+            return res.status(500).json({
+                message: "Registration Failed"
+            });
+        }
+
+        res.json({
+            message: "Registration Successful!"
+        });
+    });
+});
+
+// Retrieve user data
+app.get("/users", (req, res) => {
+
+    db.query("SELECT * FROM users", (err, result) => {
+
+        if (err) {
+            return res.status(500).json(err);
+        }
+
+        res.json(result);
+    });
+});
+
+// Start server
+app.listen(3000, () => {
+    console.log("Server running at http://localhost:3000");
+});
+
+##replace password with your mysql passwd if no paswd leave like ""
+------------------------------------------------------------------------
+##Queries in database
+CREATE DATABASE registration_db;
+
+USE registration_db;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(15)
+);
+
+USE registration_db;
+SELECT * FROM users;
+
+3)commands to run in terminal
+npm init -y
+npm install express mysql2
+node server.js
+ 

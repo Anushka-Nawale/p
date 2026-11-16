@@ -1,0 +1,58 @@
+7Solidity
+
+Open Remix IDE
+1. Open Google Chrome.
+2. Visit Remix IDE.
+3. Wait for the Remix IDE to load.
+4. Click on the File Explorer.
+5. Create a new file named Student.sol
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract Student {
+
+    string public name;
+    uint public rollNo;
+    uint public age;
+
+    function setStudent(string memory _name, uint _rollNo, uint _age) public {
+        name = _name;
+        rollNo = _rollNo;
+        age = _age;
+    }
+
+    function getStudent() public view returns (string memory, uint, uint) {
+        return (name, rollNo, age);
+    }
+}
+
+
+Compile the Smart Contract
+1. Click the Solidity Compiler icon on the left.
+2. Select compiler version 0.8.20 or compatible version.
+3. Click Compile Student.sol.
+4. If there is a green tick, compilation is successful.
+
+
+Deploy the Smart Contract
+1. Click Deploy & Run Transactions.
+2. Select Environment: Remix VM.
+3. Select Contract: Student.
+4. Click the orange Deploy button.
+5. Your contract will be deployed successfully.
+
+
+
+Execute the Smart Contract
+After deployment:
+1. Expand the deployed Student contract.
+2. Find the setStudent function.
+3. Enter the following details:
+Field	Value
+Name	Yash
+Roll No	101
+Age	21
+
+4. Click transact.
+5. Click getStudent to display the stored details.
